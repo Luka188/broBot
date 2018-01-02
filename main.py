@@ -54,6 +54,7 @@ async def move_chan_to_chan(mess, message):
           new = channel
           if (previous != None):
             break;
+  print len(previous.voice_members)
   if (previous != None and new != None):
     for user in previous.voice_members:
       await client.move_member(user, new)
