@@ -2,6 +2,7 @@
 import discord
 import asyncio
 import copy
+import random as rand
 from src.fortnite import get_stats, build_string_for_stats, get_all_stats, build_string_for_all_stats
 
 symbol='!'
@@ -68,6 +69,26 @@ async def move_chan_to_chan(mess, message):
       await client.send_message(message.channel, mess[1] + ' channel not found')
     if (new == None):
       await client.send_message(message.channel, mess[2] + ' channel not found')
+async def get_help(message):
+  await client.send_message(message.channel, "The commands: \n\
+  ```\
+!fortstat <account name> \n\
+!play <youtube link>\n\
+!move <channel from> <channel to>\
+!random <arguments> <to> <chose> <from>\
+```\
+My owner is nice and will accept most the changes on me, here is a link to my source: https://github.com/Luka188/broBot")
+
+async def chose_random(mess, message):
+  li = []
+  for i in range(1, len(mess)):
+    li.append(mess[i])
+  if len(li) == 0:
+    await client.send_message(message.channel, "please add something to chose from")
+    return
+  rand.seed()
+  a = rand.randint(0, len(mess) - 1)
+  await client.send_message(message.channel, 'I picked: ' + li[a])
 
 
 @client.event
@@ -78,13 +99,16 @@ async def on_ready():
   print('------')
 @client.event
 async def on_message(message):
+  if message.channel.is_private and not message.author.bot:
+    await get_help(message)
+    return
   if not(len(message.content) and message.content[0] == symbol):
     return
   message.content = message.content[1:]
   mess = message.content.split()
   if len(mess) > 0:
     if mess[0] == 'fortstat':
-      if check_args(mess, 1, message):
+      if await check_args(mess, 1, message):
         await call_fortnite(mess[1], message)
     if mess[0] == 'play':
       if await check_args(mess, 1, message):
@@ -92,4 +116,6 @@ async def on_message(message):
     if mess[0] == 'move':
       if await check_args(mess, 2, message):
         await move_chan_to_chan(mess, message)
+    if mess[0] == 'random':
+      await chose_random(mess, message)
 client.run(token)
