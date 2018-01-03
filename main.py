@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 import discord
 import asyncio
-from src.fortnite import get_squad_stats, build_string_for_squad_stats
-
+import copy
+from src.fortnite import get_stats, build_string_for_stats, get_all_stats, build_string_for_all_stats
 
 symbol='!'
 token='Mzk3NDI2MjM0MDI1NDQzMzMw.DSv0VA.edPUD214IyWDdRxZ65azoZkc1ss'
@@ -15,12 +15,14 @@ print('done init')
 async def call_fortnite(name, message):
   username = name # Here your username.
   platform = 'pc' # Here your platform: psn, xbox, pc.
-  squad_data = get_squad_stats(username, platform)
-  if len(squad_data) == 0:
+  data = get_all_stats(name, 'pc')
+  if len(data) == 0:
     await client.send_message(message.channel, "Wrong username")
     return
-  squad_data = squad_data[0]
-  await client.send_message(message.channel, (build_string_for_squad_stats(squad_data)))
+  wow = build_string_for_all_stats(username, data)
+  wow = '```python\n' + str(wow) + '```\n'
+  await client.send_message(message.channel, wow)
+
 async def come_and_play_sound(url, message):
   if (message.author.voice.voice_channel == None):
     await client.send_message(message.channel, "User not in voice channel")
@@ -54,11 +56,13 @@ async def move_chan_to_chan(mess, message):
           new = channel
           if (previous != None):
             break;
-  print len(previous.voice_members)
+  print(len(previous.voice_members))
   if (previous != None and new != None):
-    for user in previous.voice_members:
+    mems = copy.deepcopy(previous.voice_members)
+    for user in mems:
       await client.move_member(user, new)
       await client.send_message(message.channel, 'moving ' + user.name + ' to ' + mess[2])
+      print(user.name)
   else:
     if (previous == None):
       await client.send_message(message.channel, mess[1] + ' channel not found')

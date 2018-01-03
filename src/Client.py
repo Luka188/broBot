@@ -8,7 +8,6 @@ class Client:
     def send_request(self, platform, username):
         r = requests.get(self.URL + platform + '/' + username)
         response = r.text
-
         try:
             player_data = json.loads(self.find_between(response, 'var playerData = ', ';</script>'))
             account_info = json.loads(self.find_between(response, 'var accountInfo = ', ';</script>'))
